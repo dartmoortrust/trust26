@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getRandomGradient } from '$lib/tools';
-	const { text, level = 1, underline = true } = $props();
+	const { text, level = 1, underline = false } = $props();
 	let borderCss = getRandomGradient();
 </script>
 
@@ -14,7 +14,7 @@
 			<h3 class="text-xl">{text}</h3>
 		{/if}
 		{#if underline}
-			<div class={`${borderCss} h-1`}></div>
+			<div class={`${borderCss} h-0.5`}></div>
 		{/if}
 	</div>
 {/if}

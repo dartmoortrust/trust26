@@ -5,7 +5,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Image from '$lib/ui/Image.svelte';
 	import RecordMap from '$lib/ui/RecordMap.svelte';
-	import { en2ll, os2ll } from '$lib/tools/osgb';
+	import { os2ll } from '$lib/tools/osgb';
 	let { params } = $props();
 	const record = await getRecord(params.id);
 
@@ -23,8 +23,10 @@
 	}
 
 	$effect(() => {
-		updateRecord.fields.location_x.set(pos?.lng ?? null);
-		updateRecord.fields.location_y.set(pos?.lat ?? null);
+		if(pos){
+			updateRecord.fields.location_x.set(pos.lng ?? null);
+			updateRecord.fields.location_y.set(pos.lat ?? null);
+		}
 	});
 
 	// Place Search

@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { browser } from '$app/environment'; // <-- IMPORT THIS
 	import { env } from '$env/dynamic/public';
 	import { ll2os } from '$lib/tools/osgb';
 	import maplibregl from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
+	import { onMount } from 'svelte';
 
 	// ---------------------------------------------------------
 	// Props (runes)
@@ -29,7 +31,6 @@
 	});
 	let map: maplibregl.Map;
 	let marker: maplibregl.Marker | null = null;
-	let container: HTMLDivElement;
 
 	// Helper: create or replace a marker
 	function createMarker(pos: { lat: number; lng: number }) {
@@ -53,10 +54,8 @@
 	// ---------------------------------------------------------
 
 	// Initialize map once (FIX APPLIED HERE)
-	$effect(() => {
-		if (map) return;
 
-		// Correctly check if position is null before accessing properties
+	onMount(() => {
 		const initialCenter: [number, number] = position
 			? [position.lng, position.lat]
 			: [-3.65, 50.65]; // Default coordinates
@@ -64,7 +63,7 @@
 		const initialZoom = position ? 14 : 7;
 
 		map = new maplibregl.Map({
-			container,
+			container: 'map',
 			style: `https://api.os.uk/maps/vector/v1/vts/resources/styles?srs=3857&key=${env.PUBLIC_OS_KEY}`,
 			center: initialCenter,
 			zoom: initialZoom
@@ -75,12 +74,13 @@
 
 	// Create or update marker when `position` changes
 	$effect(() => {
-		if (!map) return;
+		// Ensure map is initialized and we are on the client
+		if (!browser || !map) return;
 
 		if (position) {
 			createMarker(position);
 			map.setCenter([position.lng, position.lat]);
-			map.setZoom(13);
+			map.setZoom(16);
 		} else {
 			// Optional: Remove marker if position becomes null later
 			if (marker) {
@@ -92,12 +92,16 @@
 
 	// Handle marker drag enable/disable
 	$effect(() => {
-		if (marker) marker.setDraggable(edit);
+		// Ensure we are on the client
+		if (!browser || !marker) return;
+
+		marker.setDraggable(edit);
 	});
 
 	// In edit mode, allow click-to-create marker when none exists
 	$effect(() => {
-		if (!map) return;
+		// Ensure map is initialized and we are on the client
+		if (!browser || !map) return;
 
 		const onClick = (e: maplibregl.MapMouseEvent) => {
 			if (!edit) return;
@@ -113,9 +117,13 @@
 	});
 </script>
 
-<div bind:this={container} class="map">
+<div id="map" class="map">
 	{#if info}
-		<div class="absolute top-2 left-2 z-10 bg-white p-1">{ll2os(position)}</div>
+		<div class="absolute top-2 left-2 z-10 bg-white p-1">
+			{#if position}
+				{ll2os(position)}
+			{/if}
+		</div>
 	{/if}
 </div>
 

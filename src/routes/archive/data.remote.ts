@@ -1,6 +1,7 @@
 import * as v from 'valibot';
-import { form, query } from '$app/server';
+import { form, prerender, query } from '$app/server';
 import { db } from '$lib/server/db';
+import { ts } from '$lib/server/search';
 
 export const getRecord = query(v.string(), async (id) => {
 	const file = await db.query(
@@ -8,7 +9,7 @@ export const getRecord = query(v.string(), async (id) => {
         SELECT 
 			f.id, f.title, f.date_year, f.date_month, f.date_day, f.date_estimated, f.detail, f.public, f.caption_front, f.caption_back,
 			ST_X(f.location_geom) as location_x, ST_Y(f.location_geom) as location_y, f.location_name, f.ai_markdown, f.notes,
-			f.location_estimated,
+			f.location_estimated, f.transform,
 			c.title as coltitle, c.id as colid
         FROM files f
 		JOIN fonds c
@@ -141,22 +142,31 @@ export const getCollections = query(async () => {
 	return collections.rows;
 });
 
-export const getCollectionRecords = query(v.string(), async (id) => {
-	const records = await db.query(
-		`
-        SELECT *
-        FROM files
-        WHERE collection_id = $1    
-		LIMIT 50
-    `,
-		[id]
-	);
-	const collection = await db.query(`SELECT * from fonds where id = $1`, [id]);
-	return {
-		records: records.rows,
-		collection: collection.rows[0]
-	};
-});
+export const getCollectionRecords = query(
+	v.object({
+		id: v.string(),
+		page: v.number(),
+		per_page: v.number()
+	}),
+	async (searchParams) => {
+		const res = await ts
+			.collections('records')
+			.documents()
+			.search({
+				q: '*',
+				query_by: '*',
+				filter_by: `collection_id:${searchParams.id}`,
+				page: searchParams.page,
+				per_page: searchParams.per_page
+			});
+
+		const collection = await db.query(`SELECT * from fonds where id = $1`, [searchParams.id]);
+		return {
+			records: res,
+			collection: collection.rows[0]
+		};
+	}
+);
 
 export const searchPlaces = query(v.string(), async (q) => {
 	const searchPattern = `%${q}%`;
@@ -166,3 +176,30 @@ export const searchPlaces = query(v.string(), async (q) => {
 	);
 	return places.rows;
 });
+
+export const getTrustees = prerender(async () => {
+	// Ordering by ID puts those with the highest priority first on the page.
+	const trustees = await db.query(`SELECT * FROM trustees where retired = false order by id asc`);
+	return trustees.rows;
+});
+
+export const getTrustee = prerender(v.string(), async (id) => {
+	// Ordering by ID puts those with the highest priority first on the page.
+	const trustees = await db.query(`SELECT * FROM trustees where retired = false and slug = $1`, [
+		id
+	]);
+	return trustees.rows[0];
+});
+
+export const searchRecords = query(
+	v.object({
+		q: v.string(),
+		query_by: v.string(),
+		per_page: v.number(),
+		page: v.number()
+	}),
+	async (searchParams) => {
+		let res = await ts.collections('records').documents().search(searchParams);
+		return res;
+	}
+);

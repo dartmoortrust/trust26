@@ -4,7 +4,8 @@
 
 <div class="shadow">
 	<Container
-		><nav class="flex gap-4 py-4">
+		><nav class="flex items-center gap-4 py-4">
+			<span class="mr-10 text-xl font-bold">The Dartmoor Trust</span>
 			<a href="/">Home</a>
 			<a href="/archive">Archive</a>
 			<a href="/charity">Charity</a>

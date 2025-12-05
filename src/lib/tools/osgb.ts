@@ -805,8 +805,11 @@ GT_Math.Lat_Long_to_North = function (PHI, LAM, a, b, e0, n0, f0, PHI0, LAM0) {
 	return I + Math.pow(p, 2) * II + Math.pow(p, 4) * III + Math.pow(p, 6) * IIIA;
 };
 
-export const ll2os = (position: any) => {
-	const { lng, lat } = position;
+export const ll2os = (position) => {
+	if (!position) {
+        return { lng:null,lat:null }; // or throw an error, depending on desired behavior
+    }
+	const { lng = null, lat = null } = position;
 	const wgs84 = new GT_WGS84();
 	wgs84.setDegrees(lat, lng);
 	const osgb = wgs84.getOSGB();

@@ -6,6 +6,7 @@
 
 <Container>
 	<Header text="Archive" />
+	<a href="/archive/search">Search</a>
 	<div class="grid grid-cols-2 gap-5">
 		<div>
 			<ol>
