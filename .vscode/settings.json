@@ -1,5 +1,7 @@
 {
 	"files.associations": {
 		"*.css": "tailwind"
-	}
+	},
+	"appService.defaultWebAppToDeploy": "/subscriptions/ba1e6944-8a62-4736-ab10-d871370138e2/resourceGroups/Archive/providers/Microsoft.Web/sites/trust26",
+	"appService.deploySubpath": "."
 }

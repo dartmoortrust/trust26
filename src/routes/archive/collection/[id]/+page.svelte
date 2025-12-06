@@ -1,16 +1,27 @@
 <script>
 	import Container from '$lib/ui/Container.svelte';
 	import Header from '$lib/ui/Header.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
-	import RecordCard from '$lib/ui/RecordCard.svelte';
-	import { getCollectionRecords } from '../../data.remote';
+	import Search from '$lib/ui/Search.svelte';
+
 	let { params } = $props();
-	const { collection, records } = $derived(
-		await getCollectionRecords({ id: params.id, page: 1, per_page: 25 })
-	);
+
+	const searchParams = $derived({
+		q: '',
+		query_by: '*',
+		filter_by: `collection_id:${params.id}`,
+		page: 1,
+		per_page: 25
+	});
 </script>
 
-<Container>
+<Container py>
+	<div class="flex flex-col gap-10">
+		<Header text={'Collection test'} />
+		<Search {searchParams} />
+	</div>
+</Container>
+
+<!-- <Container>
 	<div class="flex gap-10 py-10">
 		<div>
 			<Header text={`${collection.title} Collection`} />
@@ -21,4 +32,4 @@
 			{/each}
 		</div>
 	</div>
-</Container>
+</Container> -->

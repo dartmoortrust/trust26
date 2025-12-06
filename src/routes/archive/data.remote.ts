@@ -196,6 +196,7 @@ export const searchRecords = query(
 		q: v.string(),
 		query_by: v.string(),
 		per_page: v.number(),
+		filter_by: v.optional(v.string()),
 		page: v.number()
 	}),
 	async (searchParams) => {
