@@ -7,6 +7,7 @@
 
 	let isLoaded = $state(false);
 	let hasError = $state(false);
+	let imgElement: HTMLImageElement | null = $state(null);
 
 	const transforms = $derived.by(() => {
 		if (!record) return '';
@@ -40,16 +41,27 @@
 		hasError = true;
 	}
 
-	// Reset loading state when image URL changes
+	// Reset loading state when image URL changes and check if already loaded
 	$effect(() => {
 		imageUrl;
 		isLoaded = false;
 		hasError = false;
+
+		// Check if image is already complete (cached or loaded before handler attached)
+		if (imgElement?.complete) {
+			if (imgElement.naturalWidth === 0) {
+				// Image failed to load
+				handleError();
+			} else {
+				// Image loaded successfully
+				handleLoad();
+			}
+		}
 	});
 </script>
 
 {#if imageUrl}
-	<div class="relative w-full" style="aspect-ratio: 1 / 1;">
+	<div class="relative w-full">
 		<!-- Skeleton loader -->
 		{#if !isLoaded}
 			<div class="absolute inset-0 skeleton animate-pulse bg-gray-200">
@@ -74,6 +86,7 @@
 		<!-- Actual image -->
 		{#if !hasError}
 			<img
+				bind:this={imgElement}
 				class="w-full transition-opacity duration-300"
 				class:opacity-0={!isLoaded}
 				class:opacity-100={isLoaded}

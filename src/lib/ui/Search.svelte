@@ -23,7 +23,17 @@
 
 <div class="flex flex-col gap-5">
 	<div class="flex items-center gap-3 py-5">
-		<input type="text" bind:value={q} placeholder="Search" class="input" />
+		<input
+			type="text"
+			bind:value={q}
+			placeholder="Search"
+			class="input"
+			onkeydown={(e) => {
+				if (e.key === 'Enter') {
+					localParams.q = q;
+				}
+			}}
+		/>
 		<button
 			class="btn btn-soft btn-success"
 			onclick={() => {
